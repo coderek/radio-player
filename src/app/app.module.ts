@@ -4,10 +4,18 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 
 import { AppComponent } from './app.component';
+import { DisplayComponent } from './display/display.component';
+import { ListComponent } from './list/list.component';
+import { TimerComponent } from './timer/timer.component';
+import { VisualSoundComponent } from './visual-sound/visual-sound.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    DisplayComponent,
+    ListComponent,
+    TimerComponent,
+    VisualSoundComponent
   ],
   imports: [
     BrowserModule,

@@ -1,3 +1,9 @@
-<h1>
-  {{title}}
-</h1>
+<div class="container">
+    <nav>
+        <header>
+            SG online Radio Player
+        </header>
+    </nav>
+    <app-display [station]="current_station"></app-display>
+    <app-list (onPlayStation)="onPlayStation($event)"></app-list>
+</div>
