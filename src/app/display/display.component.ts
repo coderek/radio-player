@@ -1,113 +1,99 @@
-import { ElementRef, SimpleChanges, Directive, OnChanges, ViewChild, Component, OnInit, Input } from '@angular/core';
-import { TimerComponent } from '../timer/timer.component';
-import { Http } from '@angular/http';
-import { WebSocketService } from '../web-socket.service';
-
-import 'rxjs/add/operator/toPromise';
-import {Subject} from 'rxjs/Rx';
-import { Station } from '../station';
-import { trim } from '../util.service';
+import {OnChanges, ViewChild, Component, Input} from "@angular/core";
+import {TimerComponent} from "../timer/timer.component";
+import {WebSocketService} from "../services/websocket.service";
+import "rxjs/add/operator/toPromise";
+import {Station} from "../models/station";
+import {trim} from "../services/util.service";
+import {Observable} from 'rxjs/Rx';
 
 
 @Component({
-    selector: 'app-display',
-    providers: [WebSocketService],
-    templateUrl: './display.component.html',
-    styleUrls: ['./display.component.css']
+  selector: 'app-display',
+  providers: [WebSocketService],
+  templateUrl: './display.component.html',
+  styleUrls: ['./display.component.css']
 })
 
 export class DisplayComponent implements OnChanges {
-    // currently playing station
-    @Input()
-    station:Station=null;
+  // currently playing station
+  @Input()
+  station: Station = null;
 
-    currentTrack:string="";
-    currentArtist:string="";
-    currentCoverUrl:string="";
+  currentTrack: string = "";
+  currentArtist: string = "";
+  currentCoverUrl: string = "";
 
-    socket: WebSocket;
-    mq = []; // message queue
+  stream: Observable<string>;
 
-    @ViewChild(TimerComponent)
-    private timer: TimerComponent;
+  @ViewChild(TimerComponent)
+  private timer: TimerComponent;
 
-    audioEle = new Audio;
+  audioEle = new Audio;
 
-    constructor(private sockService: WebSocketService) {
-        this.socket = sockService.connect("ws://pi:4201");
-        this.socket.onopen = ()=>{
-            console.log("Socket open");
-            let checkAndSend = ()=> {
-                let next = this.mq.pop();
-                if (next === null) {
-                    console.log("Exit message loop");
-                    return;
-                }
-                if (next !== undefined) {
-                    console.log("Sending message:" + next);
-                    this.socket.send(next);
-                }
-                setTimeout(checkAndSend, 0);
-            };
-            checkAndSend();
-        }
-        this.socket.onclose = ()=>{
-            console.log("Socket closed");
-            this.mq.push(null);
-        }
+  constructor(private sockService: WebSocketService) {
+    this.stream = sockService.getObservable();
+    this.stream.subscribe(
+      (msg)=> console.log(msg),
+      (err)=> console.log(err),
+      ()=> console.log('stream closed')
+    );
+    this.sockService.setResultSelector(this.interpretServerMessage.bind(this));
+    this.audioEle.crossOrigin = "anonymouse";
+  }
 
-        this.socket.onmessage = (m)=> this.handleMessage(m);
-        this.audioEle.crossOrigin = "anonymouse";
+  interpretServerMessage(e: MessageEvent) {
+    let m = e.data;
+    let [key, data] = m.split("=");
+
+    key = key.toLowerCase();
+
+    // key can be either streamurl or streamtitle
+
+    if (key == "streamtitle") {
+      // data should be a string
+      this.currentTrack = data;
     }
 
-    handleMessage(m) {
-        let [key, data] = m.data.split("=");
+    if (key == "streamurl") {
+      // data is url encoded and can be string or json object
+      if (data) data = decodeURIComponent(data).trim();
+      data = trim(data, "[' ]");
 
-        key = key.toLowerCase();
-
-        if (data) data = decodeURIComponent(data).trim();
-        data = trim(data, "[' ]");
-
-        if (key == "streamurl") {
-            try {
-                let {artist, coverUrl, id, track} = JSON.parse(data).current_song;
-                this.currentArtist = artist;
-                this.currentTrack = track;
-                this.currentCoverUrl = coverUrl;
-            } catch(e) {
-                this.currentTrack = "";
-                this.currentArtist = "";
-                this.currentCoverUrl = "";
-                console.log("Not valid json: " + data);
-            }
-        } else if (key == "streamtitle") {
-            this.currentTrack = data;
-        }
+      // if it's not json, we just unset related fields
+      try {
+        let {artist, coverUrl, id, track} = JSON.parse(data).current_song;
+        this.currentArtist = artist;
+        this.currentTrack = track;
+        this.currentCoverUrl = coverUrl;
+      } catch (e) {
+        this.currentTrack = "";
+        this.currentArtist = "";
+        this.currentCoverUrl = "";
+      }
     }
+  }
 
-    ngOnChanges(changes) {
-        if (changes.hasOwnProperty("station") && changes.station.currentValue!=null) {
-            console.log("ngOnChanges:", changes.station.currentValue);
-            let m = changes.station.currentValue.name.match(/(\d+\.\d+)/);
+  ngOnChanges(changes) {
+    if (changes.hasOwnProperty("station") && changes.station.currentValue != null) {
+      console.log("ngOnChanges:", changes.station.currentValue);
+      let m = changes.station.currentValue.name.match(/(\d+\.\d+)/);
 
-            if (m) {
-                console.log("send CHANGE_STATION "+m[0]);
-                this.mq.push("CHANGE_STATION|"+m[0]);
-            }
+      if (m) {
+        this.sockService.send("CHANGE_STATION|" + m[0]);
+      }
 
-            this.timer.restart();
-            let station = changes.station.currentValue;
+      this.timer.restart();
+      let station = changes.station.currentValue;
 
-            if (this.audioEle && station.url != null) {
-                this.audioEle.src = station.url;
-                console.log(station);
-                if (station.action == "Pause")
-                    this.audioEle.play();
-                else
-                    this.audioEle.pause();
-            }
-        } else {
-            this.audioEle.pause();
-        }
+      if (this.audioEle && station.url != null) {
+        this.audioEle.src = station.url;
+        if (station.action == "Pause")
+          this.audioEle.play();
+        else
+          this.audioEle.pause();
+      }
+    } else {
+      this.audioEle.pause();
     }
+  }
 }

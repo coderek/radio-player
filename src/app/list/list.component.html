@@ -1,6 +1,7 @@
-    <div  [class.selected]="selected==station"
-        class="row"
-        *ngFor="let station of stations"
-        (click)="playStation(station)">
-        <div>{{station.name}}</div> <button>{{station.action}}</button>
-    </div>
+<div [class.selected]="selected==station"
+     class="row"
+     *ngFor="let station of stations"
+     (click)="playStation(station)">
+  <div>{{station.name}}</div>
+  <button>{{station.action}}</button>
+</div>

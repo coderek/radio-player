@@ -1,41 +1,41 @@
 :host {
-    border-top: 1px solid black;
-    flex: 1 0;
-    box-shadow: inset 0 1px 0px 4px #424040;
-    padding-top: 10px;
-    overflow-y: auto;
+  border-top: 1px solid black;
+  flex: 1 0;
+  box-shadow: inset 0 1px 0px 4px #424040;
+  padding-top: 10px;
+  overflow-y: auto;
 }
 
 .container {
-    overflow-y: auto;
-    flex: 1 1 auto;
-    min-height: 0px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0px;
 }
 
 .row {
-    padding: 4px 10px;
-    /*font-family: san-serif;*/
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
+  padding: 4px 10px;
+  /*font-family: san-serif;*/
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 .row:hover {
-    cursor: pointer;
-    background-color: #333;
-    display: flex;
-    flex-direction: row;
+  cursor: pointer;
+  background-color: #333;
+  display: flex;
+  flex-direction: row;
 }
 
 .row div {
-    flex: 1 1;
+  flex: 1 1;
 }
 
 .row.selected {
-    background-color: #333;
+  background-color: #333;
 }
 
 button {
-    width: 60px;
-    flex: none;
+  width: 60px;
+  flex: none;
 }

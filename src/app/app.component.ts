@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { Station } from './station';
+import {Component} from "@angular/core";
+import {Station} from "./models/station";
 
 @Component({
   selector: 'app-root',
@@ -9,9 +9,9 @@ import { Station } from './station';
 
 export class AppComponent {
   title = 'app works!';
-  current_station:Station = null;
+  current_station: Station = null;
 
   onPlayStation(station) {
-      this.current_station = station;
+    this.current_station = station;
   }
 }
