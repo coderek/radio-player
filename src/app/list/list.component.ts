@@ -1,22 +1,23 @@
 import {EventEmitter, Output, Component, OnInit, AfterViewInit} from "@angular/core";
 import {environment} from "environments/environment";
-import {StorageService} from "../services/storage.service";
+import {AppService} from "../services/app.service";
 import {Station} from "../models/station";
 
 @Component({
   selector: 'app-list',
-  providers: [StorageService],
+  providers: [],
   templateUrl: './list.component.html',
   styleUrls: ['./list.component.css']
 })
 
 export class ListComponent implements OnInit, AfterViewInit {
-  stations: Station[] = []
+  stations: Station[] = [];
+
   @Output()
   onPlayStation = new EventEmitter<{}>();
   selected = null;
 
-  constructor(private storage: StorageService) {
+  constructor(private appService: AppService) {
     this.stations = environment.stations;
     this.stations.forEach((s) => s.action = "Play");
   }
@@ -24,36 +25,39 @@ export class ListComponent implements OnInit, AfterViewInit {
   ngOnInit() {
   }
 
-  ngAfterViewInit() {
+  resumePlaying() {
     setTimeout(() => {
-      if (this.storage.has("last_played")) {
-        let name = this.storage.get("last_played");
+      if (this.appService.has("last_played")) {
+        let name = this.appService.get("last_played");
         let station = this.stations.find((s) => s.name == name);
         if (station)
           this.playStation(station);
       }
     }, 0);
-
   }
 
-  playStation(station) {
-
-    if (station == this.selected) {
-      // toggle
-      if (station.action == "Play") {
-        station.action = "Pause";
-      } else {
-        station.action = "Play";
-      }
-    } else {
-      if (this.selected != null) {
-        this.selected.action = "Play";
-      }
-      station.action = "Pause";
+  ngAfterViewInit() {
+    console.log(this.appService.autoPlay)
+    if (this.appService.autoPlay) {
+      this.resumePlaying();
     }
+  }
 
+  toggleFavorite(station: Station) {
+    if (station)
+      station.favorite = !station.favorite;
+  }
+
+  pauseStation(station: Station) {
+    if (station)
+      station.action = "Play";
+  }
+
+  playStation(station: Station) {
+    this.pauseStation(this.selected);
+    station.action = "Pause";
     this.selected = station;
-    this.storage.put("last_played", station.name);
+    this.appService.put("last_played", station.name);
     this.onPlayStation.emit({
       name: station.name,
       url: station.url,

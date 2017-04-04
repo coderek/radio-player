@@ -1,26 +1,25 @@
 import {BrowserModule} from "@angular/platform-browser";
 import {NgModule} from "@angular/core";
 import {HttpModule} from "@angular/http";
-import {AppComponent} from "./app.component";
-import {DisplayComponent} from "./display/display.component";
-import {ListComponent} from "./list/list.component";
-import {TimerComponent} from "./timer/timer.component";
-import {VisualSoundComponent} from "./visual-sound/visual-sound.component";
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {MaterialModule} from '@angular/material';
+
+import {allComponents, bootstrapComponent} from './index';
+
+import {AppService} from './services/app.service';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    DisplayComponent,
-    ListComponent,
-    TimerComponent,
-    VisualSoundComponent
-  ],
+  declarations: allComponents,
   imports: [
     BrowserModule,
-    HttpModule
+    HttpModule,
+    BrowserAnimationsModule,
+    MaterialModule,
   ],
-  providers: [],
-  bootstrap: [AppComponent]
+  providers: [
+    AppService,
+  ],
+  bootstrap: [bootstrapComponent]
 })
 export class AppModule {
 }

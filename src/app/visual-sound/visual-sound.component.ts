@@ -1,11 +1,11 @@
-import {ElementRef, AfterViewInit, ViewChild, OnChanges, Input, Component} from "@angular/core";
+import {ElementRef, AfterViewInit, ViewChild, NgZone, Input, Component} from "@angular/core";
 
 @Component({
   selector: 'app-visual-sound',
   styleUrls: ['./visual-sound.component.css'],
   template: `<canvas #canvas height=40></canvas>`
 })
-export class VisualSoundComponent implements OnChanges, AfterViewInit {
+export class VisualSoundComponent implements AfterViewInit {
   @ViewChild("canvas")
   canvas: ElementRef;
 
@@ -22,12 +22,12 @@ export class VisualSoundComponent implements OnChanges, AfterViewInit {
   dataArray: Float32Array;
   analyser: AnalyserNode;
   swatches = [];
+  prop: number;
 
-  constructor() {
-  }
+  constructor(private ngZone: NgZone) {}
 
   initContext() {
-    this.swatches = Array(10).fill(1).map(() => this.pastelColors());
+    this.swatches = Array(10).fill(1).map(() => VisualSoundComponent.pastelColors());
     let canvas = this.canvas.nativeElement;
     this.canvasCtx = canvas.getContext("2d");
     this.width = canvas.width;
@@ -44,43 +44,35 @@ export class VisualSoundComponent implements OnChanges, AfterViewInit {
     this.gainNode.connect(this.audioCtx.destination);
 
     this.analyser.fftSize = 64;
-    var bufferLength = this.analyser.frequencyBinCount;
-    console.log(bufferLength);
+    let bufferLength = this.analyser.frequencyBinCount;
     this.dataArray = new Float32Array(bufferLength);
-  }
-
-  ngOnChanges() {
-    if (this.audioEle) {
-      this.update();
-    } else {
-      this.clear();
-    }
+    this.prop = this.height / (this.analyser.maxDecibels - this.analyser.minDecibels);
   }
 
   draw() {
     this.canvasCtx.clearRect(0, 0, this.width, this.height);
 
-    requestAnimationFrame(() => this.draw());
     this.analyser.getFloatFrequencyData(this.dataArray);
-
     this.canvasCtx.fillStyle = '#474444';
-    this.canvasCtx.fillRect(0, 0, this.width, this.height);
 
-    var barWidth = (this.width / this.dataArray.length);
-    var barHeight;
-    var x = 0;
-    for (var i = 0; i < this.dataArray.length; i++) {
-      barHeight = this.height * (this.dataArray[i] - this.analyser.minDecibels) / (this.analyser.maxDecibels - this.analyser.minDecibels);
+    this.canvasCtx.fillRect(0, 0, this.width, this.height);
+    let barWidth = (this.width / this.dataArray.length);
+
+    let barHeight;
+    let x = 0;
+    for (let i = 0; i < this.dataArray.length; i++) {
+      barHeight = this.prop * (this.dataArray[i] - this.analyser.minDecibels);
       this.drawBar(x, barWidth, barHeight);
       x += barWidth + 1;
     }
+    requestAnimationFrame(() => this.draw());
   }
 
 
-  pastelColors() {
-    var r = (Math.round(Math.random() * 127) + 127).toString(16);
-    var g = (Math.round(Math.random() * 127) + 127).toString(16);
-    var b = (Math.round(Math.random() * 127) + 127).toString(16);
+  static pastelColors() {
+    let r = (Math.round(Math.random() * 127) + 127).toString(16);
+    let b = (Math.round(Math.random() * 127) + 127).toString(16);
+    let g = (Math.round(Math.random() * 127) + 127).toString(16);
     return '#' + r + g + b;
   }
 
@@ -98,15 +90,6 @@ export class VisualSoundComponent implements OnChanges, AfterViewInit {
 
   ngAfterViewInit() {
     this.initContext();
-    this.draw();
+    this.ngZone.runOutsideAngular(()=>this.draw());
   }
-
-  update() {
-    console.log("fucking" + this.audioEle);
-  }
-
-  clear() {
-
-  }
-
 }
