@@ -68,9 +68,21 @@ export class DisplayComponent implements OnChanges {
       } catch (e) {
         this.currentTrack = "";
         this.currentArtist = "";
-        this.currentCoverUrl = "";
+        this.currentCoverUrl = this.getDefaultCover();
       }
     }
+  }
+
+  getDefaultCover() {
+    if (this.station === null) return '';
+
+    let matcher = /(\d{2,3}\.\d)/;
+    let matched = this.station.name.match(matcher);
+    if (matched) {
+      let freq = matched[1];
+      return `/assets/images/${freq}_cover.jpg`;
+    }
+    return '';
   }
 
   ngOnChanges(changes) {

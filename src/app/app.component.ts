@@ -2,7 +2,7 @@ import {Component} from "@angular/core";
 import {Station} from "./models/station";
 
 import { PlatformService } from './services/platform.service';
-
+import {AppService} from './services/app.service';
 @Component({
   selector: 'app-root',
   providers: [PlatformService],
@@ -13,8 +13,10 @@ import { PlatformService } from './services/platform.service';
 export class AppComponent {
   current_station: Station = null;
   isRunningInElectron: boolean=false;
-
-  constructor(platform: PlatformService) {
+  get status() {
+    return this.appService.status;
+  }
+  constructor(private platform: PlatformService, private appService: AppService) {
     this.isRunningInElectron = platform.isRunningInElectron();
   }
 

@@ -8,13 +8,12 @@ const USER_SETTINGS = "userSettings";
  *
  *
  */
-
-
 @Injectable()
 export class AppService {
   // single instance
   settings: Settings = new Settings();
   store: Storage = null;
+  status: string = "By coderek";
 
   constructor() {
     this.store = localStorage;

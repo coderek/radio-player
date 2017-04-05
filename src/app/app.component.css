@@ -29,3 +29,12 @@ nav header {
   font-weight: bold;
 }
 
+.status {
+  text-align: right;
+  padding-right: 10px;
+  line-height: 40px;
+  height: 40px;
+  font-size: 80%;
+  color: #888;
+}
+
