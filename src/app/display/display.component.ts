@@ -19,6 +19,9 @@ export class DisplayComponent implements OnChanges {
 	@Input()
 	iPreference;
 
+	get paused() {
+		return this.audioEle.paused;
+	}
 	currentTrack: string = "";
 	currentArtist: string = "";
 	currentCoverUrl: string = "";
@@ -100,26 +103,24 @@ export class DisplayComponent implements OnChanges {
 		}
 
 		if (changes.iStation) {
-			console.log("ngOnChanges:", changes.iStation.currentValue.get('name'));
-			let m = changes.iStation.currentValue.get('name').match(/(\d+\.\d+)/);
+			console.log(changes.iStation);
+			let {previousValue, currentValue} = changes.iStation;
 
-			if (m) {
-				this.sockService.send("CHANGE_STATION|" + m[0]);
-			}
-
-			this.timer.restart();
-
-			let station = changes.iStation.currentValue;
-
-			console.log(station.toJS())
-			if (this.audioEle && station.get('url') != null) {
-				this.audioEle.src = station.get('url');
-				if (station.get('action') == "Pause") {
-					this.audioEle.play();
-					console.log('play, play')
-				}
-				else
+			if (previousValue!== undefined && previousValue.get('name') === currentValue.get('name')) {
+				console.log('fuck', currentValue)
+				if (currentValue.get('action') === 'Play') {
 					this.audioEle.pause();
+				} else {
+					this.audioEle.play();
+				}
+			} else if (currentValue!==undefined) {
+				let m = currentValue.get('name').match(/(\d+\.\d+)/);
+				if (m) {
+					this.sockService.send("CHANGE_STATION|" + m[0]);
+					this.timer.restart();
+					this.audioEle.src = currentValue.get('url');
+					this.audioEle.play();
+				}
 			}
 		}
 	}

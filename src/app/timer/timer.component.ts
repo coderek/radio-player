@@ -1,4 +1,4 @@
-import {Component, OnInit} from "@angular/core";
+import {Component, Input, OnInit} from "@angular/core";
 
 const ONE_HOUR = 3600 * 1000;
 const ONE_MINUTE = 60 * 1000;
@@ -6,7 +6,7 @@ const ONE_SECOND = 1000;
 
 @Component({
 	selector: 'app-timer',
-	templateUrl: './timer.component.html'
+	template: `{{hour}}:{{minute}}:{{second}}`
 })
 export class TimerComponent implements OnInit {
 	startTime: Date = null;
@@ -14,6 +14,9 @@ export class TimerComponent implements OnInit {
 	hour: String = "00";
 	minute: String = "00";
 	second: String = "00";
+	delta:number = 0;
+	@Input()
+	pause:boolean = false;
 
 	constructor() {
 	}
@@ -40,8 +43,16 @@ export class TimerComponent implements OnInit {
 	}
 
 	update() {
+
+		if (this.pause) {
+			this.startTime = new Date(Date.now() - this.delta);
+			return;
+		}
+
 		let now = new Date;
-		let delta = now.valueOf() - this.startTime.valueOf();
+		this.delta = now.valueOf() - this.startTime.valueOf();
+		let delta = this.delta;
+
 		let hoursPassed = ~~(delta / ONE_HOUR);
 		this.hour = `${~~(hoursPassed / 10)}${hoursPassed % 10}`;
 

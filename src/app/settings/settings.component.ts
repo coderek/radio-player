@@ -24,7 +24,13 @@ import {Output, ChangeDetectionStrategy, Component, EventEmitter, Input, OnChang
                          #songOnly>Song Only
         </md-slide-toggle>
 	`,
-	styles: ['md-slide-toggle {color: #868686;} md-slide-toggle.checked {color: #eee;}'],
+	styles: [`
+		md-slide-toggle {color: #868686;} 
+		md-slide-toggle.checked {color: #eee;}  
+		:host {
+			padding: 0 10px;
+	    }
+	`],
 	changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SettingsComponent implements OnChanges {
