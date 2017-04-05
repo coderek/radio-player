@@ -1,27 +1,26 @@
 import {Output, ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges} from "@angular/core";
-import {Preference} from "../models/preference";
 
 @Component({
 	selector: 'app-settings',
 	template: `
         <md-slide-toggle title="Start playing when the player launch."
-                         [ngClass]="{checked: autoPlay.checked}"
-                         [checked]="preference.get('autoPlay')"
-                         (change)="onToggle.emit('autoStart')"
+                         [ngClass]="{checked: iPreference.get('autoPlay')}"
+                         checked="iPreference.get('autoPlay')"
+                         (change)="emit('autoPlay')"
                          #autoPlay>
             Auto Play
         </md-slide-toggle>
         <md-slide-toggle title="Play random station from favorite list after every song." [color]="'warn'"
-                         [ngClass]="{checked: playRandom.checked}"
-                         [checked]="preference.get('playRandom')"
-                         (change)="onToggle.emit('playRandom')"
+                         [ngClass]="{checked: iPreference.get('playRandom')}"
+                         checked="iPreference.get('playRandom')"
+                         (change)="emit('playRandom')"
                          #playRandom>Random
         </md-slide-toggle>
         <md-slide-toggle [color]="'primary'"
-                         [ngClass]="{checked: songOnly.checked}"
+                         [ngClass]="{checked: iPreference.get('songOnly')}"
                          title="Skip talkings."
-                         [checked]="preference.get('songOnly')"
-                         (change)="onToggle.emit('songOnly')"
+                         checked="iPreference.get('songOnly')"
+                         (change)="emit('songOnly')"
                          #songOnly>Song Only
         </md-slide-toggle>
 	`,
@@ -30,13 +29,17 @@ import {Preference} from "../models/preference";
 })
 export class SettingsComponent implements OnChanges {
 	@Input()
-	preference: Preference;
+	iPreference;
 
 	@Output()
-	onToggle: EventEmitter<string>;
+	onToggle = new EventEmitter<string>();
 
 	ngOnChanges() {
-		console.log(arguments)
-		// this.preference.save();
+		// console.log(arguments)
+		// this.iPreference.save();
+	}
+	emit(type) {
+		setTimeout(()=>
+		this.onToggle.emit(type),0)
 	}
 }

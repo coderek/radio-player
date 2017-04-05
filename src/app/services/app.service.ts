@@ -1,5 +1,4 @@
 import {Injectable} from "@angular/core";
-import {Preference} from "../models/preference";
 
 /**
  * Singleton service for managing global states
@@ -7,16 +6,11 @@ import {Preference} from "../models/preference";
 @Injectable()
 export class AppService {
 	// single instance
-	preference: Preference = new Preference();
 	store: Storage = null;
 	status: string = "By coderek";
 
 	constructor() {
 		this.store = localStorage;
-	}
-
-	getPrefernce() {
-		return this.preference;
 	}
 
 	put(key, val) {

@@ -1,8 +1,8 @@
 import {AfterViewInit, Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
 import {environment} from "environments/environment";
 import {AppService} from "../services/app.service";
-import {Station} from "../models/station";
-import {Preference} from "../models/preference";
+// import {Station} from "../models/station";
+import {List, Map} from "immutable";
 
 @Component({
 	selector: 'app-list',
@@ -10,19 +10,20 @@ import {Preference} from "../models/preference";
 	templateUrl: './list.component.html',
 	styleUrls: ['./list.component.css']
 })
-
 export class ListComponent implements OnInit, AfterViewInit {
-	stations: Station[] = [];
-	preference: Preference;
 
 	@Output()
-	onPlayStation = new EventEmitter<{}>();
+	onPlayStation = new EventEmitter<any>();
+
 	selected = null;
 
+	@Input()
+	iPreference;
+
+	@Input()
+	stations;
+
 	constructor(private appService: AppService) {
-		this.stations = environment.stations;
-		this.stations.forEach((s) => s.action = "Play");
-		this.preference = this.appService.getPrefernce();
 	}
 
 	ngOnInit() {
@@ -32,7 +33,7 @@ export class ListComponent implements OnInit, AfterViewInit {
 		setTimeout(() => {
 			if (this.appService.has("last_played")) {
 				let name = this.appService.get("last_played");
-				let station = this.stations.find((s) => s.name == name);
+				let station = this.stations.find((s) => s.get('name') == name);
 				if (station)
 					this.playStation(station);
 			}
@@ -40,36 +41,35 @@ export class ListComponent implements OnInit, AfterViewInit {
 	}
 
 	ngAfterViewInit() {
-		if (this.preference.get('autoPlay')) {
+		if (this.iPreference.get('autoPlay')) {
 			this.resumePlaying();
 		}
 	}
 
-	toggleFavorite(station: Station) {
-		if (station)
-			station.favorite = !station.favorite;
+	toggleFavorite(station) {
+		if (station) {
+			let idx = this.stations.findIndex(a=>a.get('name')===station.get('name'));
+			this.stations = this.stations.setIn([idx, 'favorite'], !station.get('favorite'));
+		}
 	}
 
-	pauseStation(station: Station) {
-		if (station)
-			station.action = "Play";
+	pauseStation(station) {
+		if (station) {
+			let idx = this.stations.findIndex(a=>a.get('name')===station.get('name'))
+			this.stations = this.stations.setIn([idx, 'action'], 'Play');
+			this.onPlayStation.emit(this.stations.get(idx));
+		}
 
-		// this.onPlayStation.emit({
-		//   name: station.name,
-		//   url: station.url,
-		//   action: station.action
-		// });
 	}
 
-	playStation(station: Station) {
+	playStation(station) {
+		console.log(station);
 		this.pauseStation(this.selected);
-		station.action = "Pause";
-		this.selected = station;
-		this.appService.put("last_played", station.name);
-		this.onPlayStation.emit({
-			name: station.name,
-			url: station.url,
-			action: station.action
-		});
+		let idx = this.stations.findIndex(a=>a.get('name')===station.get('name'))
+		this.stations = this.stations.setIn([idx, 'action'], 'Pause');
+		let newStation = this.stations.get(idx);
+		this.selected = newStation;
+		this.appService.put("last_played", station.get('name'));
+		this.onPlayStation.emit(newStation);
 	}
 }

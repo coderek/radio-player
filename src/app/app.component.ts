@@ -1,9 +1,12 @@
 import {Component} from "@angular/core";
-import {Station} from "./models/station";
+// import {Station} from "./models/station";
 
 import {PlatformService} from "./services/platform.service";
 import {AppService} from "./services/app.service";
-import {Preference} from "./models/preference";
+import {Map, List, fromJS, Collection} from 'immutable';
+import {environment} from "../environments/environment";
+const USER_SETTINGS = "userSettings";
+
 @Component({
 	selector: 'app-root',
 	providers: [PlatformService],
@@ -11,24 +14,49 @@ import {Preference} from "./models/preference";
 	styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-	current_station: Station = null;
+	iCurrentStation:any = Map({
+		name: '',
+		url: '',
+		action: '',
+		favorite: false
+	});
+
 	isRunningInElectron: boolean = false;
-	preference: Preference;
+
+	iPreference: any = Map({
+		songOnly: false,
+		playRandom: false,
+		autoPlay: false
+	});
 
 	get status() {
 		return this.appService.status;
 	}
+	// immutable
+	stations: any;
 
 	constructor(private platform: PlatformService, private appService: AppService) {
 		this.isRunningInElectron = platform.isRunningInElectron();
-		this.preference = appService.getPrefernce();
+		// if (typeof localStorage !== 'object') throw new Error("No localstorage! Radio can't start");
+		try {
+			this.iPreference = Map(JSON.parse(localStorage.getItem(USER_SETTINGS)));
+			console.log('loaded iPreference: ', this.iPreference.toJS())
+		} catch (e) {
+			// ignore invalid iPreference settings
+		}
+
+		this.stations = fromJS(environment.stations.map((s: any)=> {
+			s.action = "Play";
+			return s;
+		}));
 	}
 
-	onChangePreference(ev: Event) {
-		console.log(ev);
+	onChangePreference(ev: string) {
+		this.iPreference = this.iPreference.set(ev, !this.iPreference.get(ev));
+		localStorage.setItem(USER_SETTINGS, JSON.stringify(this.iPreference.toJS()));
 	}
 
 	onPlayStation(station) {
-		this.current_station = station;
+		this.iCurrentStation = station;
 	}
 }

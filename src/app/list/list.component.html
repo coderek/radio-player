@@ -1,18 +1,17 @@
-<div [class.selected]="selected==station"
-     class="row"
-     *ngFor="let station of stations">
-    <div>{{station.name}}
+<div class="row"
+     *ngFor="let station of stations"  [class.selected]="selected===station">
+    <div>{{station.get('name')}}
         <md-icon style="font-size: 12px" (click)="toggleFavorite(station)">
-            {{station.favorite? 'favorite':'favorite_bordered'}}
+            {{station.get('favorite')? 'favorite':'favorite_bordered'}}
         </md-icon>
     </div>
-    <!--<button>{{station.action}}</button>-->
-    <span class="play-button" [hidden]="station.action !== 'Play'" (click)="playStation(station)">
+    <!--<buttoiStationtion.action}}</button>-->
+    <span class="play-button" [hidden]="station.get('action') !== 'Play'" (click)="playStation(station)">
     <md-icon>play_circle_filled</md-icon>
     <md-icon>play_circle_outlined</md-icon>
   </span>
 
-    <span class="pause-button" [hidden]="station.action !== 'Pause'" (click)="pauseStation(station)">
+    <span class="pause-button" [hidden]="station.get('action') !== 'Pause'" (click)="pauseStation(station)">
     <md-icon>pause_circle_filled</md-icon>
     <md-icon>pause_circle_outlined</md-icon>
   </span>

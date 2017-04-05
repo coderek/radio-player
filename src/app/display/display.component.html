@@ -1,8 +1,8 @@
 <div class="indent">
     <div class="station-info">
-        <div *ngIf="station">
+        <div *ngIf="iStation">
             <div class="title">
-                {{station.name}}
+                {{iStation.get('name')}}
             </div>
 
             <div class="song-info">
@@ -15,12 +15,12 @@
                     </div>
                 </div>
                 <div class="right">
-                    <img src="{{currentCoverUrl}}">
+                    <img src="{{currentCoverUrl || getDefaultCover(iStation)}}">
                 </div>
             </div>
         </div>
     </div>
-    <app-visual-sound [stream]="audioEle"></app-visual-sound>
+    <app-visual-sound [stream]="audioEle" [mute]="muteAudio"></app-visual-sound>
 </div>
 
 <app-timer id="timer"></app-timer>

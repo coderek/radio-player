@@ -4,10 +4,12 @@
             SG online Radio Player
         </header>
     </nav>
-    <app-display [station]="current_station" [preference]="preference"></app-display>
-    <div class="toolbar">
-        <app-settings [preference]="preference" (onToggle)="onChangePreference($event)"></app-settings>
-    </div>
-    <app-list (onPlayStation)="onPlayStation($event)"></app-list>
+
+    <app-display [iStation]="iCurrentStation" [iPreference]="iPreference"></app-display>
+
+    <app-settings class="toolbar" [iPreference]="iPreference" (onToggle)="onChangePreference($event)"></app-settings>
+
+    <app-list [stations]="stations" (onPlayStation)="onPlayStation($event)" [iPreference]="iPreference"></app-list>
+
     <div class="status">{{status}}</div>
 </div>

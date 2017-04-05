@@ -1,22 +1,25 @@
-import {AfterViewInit, Component, ElementRef, Input, NgZone, ViewChild} from "@angular/core";
+import {AfterViewInit, ChangeDetectionStrategy, OnChanges, Component, ElementRef, Input, NgZone, ViewChild} from "@angular/core";
 
 @Component({
 	selector: 'app-visual-sound',
 	styleUrls: ['./visual-sound.component.css'],
 	template: `
-        <canvas #canvas height=40></canvas>`
+        <canvas #canvas height=40></canvas>`,
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class VisualSoundComponent implements AfterViewInit {
+export class VisualSoundComponent implements AfterViewInit, OnChanges {
 	@ViewChild("canvas")
 	canvas: ElementRef;
 
-	canvasCtx = null;
-
-	width: number;
-	height: number = 40;
-
 	@Input("stream")
 	audioEle = null;
+
+	@Input()
+	mute: boolean;
+
+	canvasCtx = null;
+	width: number;
+	height: number = 40;
 	audioCtx: AudioContext;
 	gainNode: GainNode;
 	radioSource: AudioNode;
@@ -91,5 +94,12 @@ export class VisualSoundComponent implements AfterViewInit {
 	ngAfterViewInit() {
 		this.initContext();
 		this.ngZone.runOutsideAngular(() => this.draw());
+	}
+
+	ngOnChanges(changes) {
+		if (changes.mute) {
+			let muteSound = changes.mute.currentValue;
+			console.log("mute sound: " + muteSound);
+		}
 	}
 }
