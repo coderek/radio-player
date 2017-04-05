@@ -1,111 +1,113 @@
-import {OnChanges, ViewChild, Component, Input} from "@angular/core";
+import {Component, Input, OnChanges, ViewChild} from "@angular/core";
 import {TimerComponent} from "../timer/timer.component";
 import {WebSocketService} from "../services/websocket.service";
 import "rxjs/add/operator/toPromise";
 import {Station} from "../models/station";
 import {trim} from "../services/util.service";
-import {Observable} from 'rxjs/Rx';
+import {Observable} from "rxjs/Rx";
 
 
 @Component({
-  selector: 'app-display',
-  providers: [WebSocketService],
-  templateUrl: './display.component.html',
-  styleUrls: ['./display.component.css']
+	selector: 'app-display',
+	providers: [WebSocketService],
+	templateUrl: './display.component.html',
+	styleUrls: ['./display.component.css']
 })
 
 export class DisplayComponent implements OnChanges {
-  // currently playing station
-  @Input()
-  station: Station = null;
+	// currently playing station
+	@Input()
+	station: Station = null;
+	// @Input()
 
-  currentTrack: string = "";
-  currentArtist: string = "";
-  currentCoverUrl: string = "";
 
-  stream: Observable<string>;
+	currentTrack: string = "";
+	currentArtist: string = "";
+	currentCoverUrl: string = "";
 
-  @ViewChild(TimerComponent)
-  private timer: TimerComponent;
+	stream: Observable<string>;
 
-  audioEle = new Audio;
+	@ViewChild(TimerComponent)
+	private timer: TimerComponent;
 
-  constructor(private sockService: WebSocketService) {
-    this.stream = sockService.getObservable();
-    this.stream.subscribe(
-      (msg)=> '',
-      (err)=> console.log(err),
-      ()=> console.log('stream closed')
-    );
-    this.sockService.setResultSelector(this.interpretServerMessage.bind(this));
-    this.audioEle.crossOrigin = "anonymouse";
-  }
+	audioEle = new Audio;
 
-  interpretServerMessage(e: MessageEvent) {
-    let m = e.data;
-    let [key, data] = m.split("=");
+	constructor(private sockService: WebSocketService) {
+		this.stream = sockService.getObservable();
+		this.stream.subscribe(
+			(msg) => '',
+			(err) => console.log(err),
+			() => console.log('stream closed')
+		);
+		this.sockService.setResultSelector(this.interpretServerMessage.bind(this));
+		this.audioEle.crossOrigin = "anonymouse";
+	}
 
-    key = key.toLowerCase();
+	interpretServerMessage(e: MessageEvent) {
+		let m = e.data;
+		let [key, data] = m.split("=");
 
-    // key can be either streamurl or streamtitle
+		key = key.toLowerCase();
 
-    if (key == "streamtitle") {
-      // data should be a string
-      this.currentTrack = data;
-    }
+		// key can be either streamurl or streamtitle
 
-    if (key == "streamurl") {
-      // data is url encoded and can be string or json object
-      if (data) data = decodeURIComponent(data).trim();
-      data = trim(data, "[' ]");
+		if (key == "streamtitle") {
+			// data should be a string
+			this.currentTrack = data;
+		}
 
-      // if it's not json, we just unset related fields
-      try {
-        let {artist, coverUrl, id, track} = JSON.parse(data).current_song;
-        this.currentArtist = artist;
-        this.currentTrack = track;
-        this.currentCoverUrl = coverUrl;
-      } catch (e) {
-        this.currentTrack = "";
-        this.currentArtist = "";
-        this.currentCoverUrl = this.getDefaultCover();
-      }
-    }
-  }
+		if (key == "streamurl") {
+			// data is url encoded and can be string or json object
+			if (data) data = decodeURIComponent(data).trim();
+			data = trim(data, "[' ]");
 
-  getDefaultCover() {
-    if (this.station === null) return '';
+			// if it's not json, we just unset related fields
+			try {
+				let {artist, coverUrl, id, track} = JSON.parse(data).current_song;
+				this.currentArtist = artist;
+				this.currentTrack = track;
+				this.currentCoverUrl = coverUrl;
+			} catch (e) {
+				this.currentTrack = "";
+				this.currentArtist = "";
+				this.currentCoverUrl = this.getDefaultCover();
+			}
+		}
+	}
 
-    let matcher = /(\d{2,3}\.\d)/;
-    let matched = this.station.name.match(matcher);
-    if (matched) {
-      let freq = matched[1];
-      return `/assets/images/${freq}_cover.jpg`;
-    }
-    return '';
-  }
+	getDefaultCover() {
+		if (this.station === null) return '';
 
-  ngOnChanges(changes) {
-    if (changes.hasOwnProperty("station") && changes.station.currentValue != null) {
-      console.log("ngOnChanges:", changes.station.currentValue);
-      let m = changes.station.currentValue.name.match(/(\d+\.\d+)/);
+		let matcher = /(\d{2,3}\.\d)/;
+		let matched = this.station.name.match(matcher);
+		if (matched) {
+			let freq = matched[1];
+			return `/assets/images/${freq}_cover.jpg`;
+		}
+		return '';
+	}
 
-      if (m) {
-        this.sockService.send("CHANGE_STATION|" + m[0]);
-      }
+	ngOnChanges(changes) {
+		if (changes.hasOwnProperty("station") && changes.station.currentValue != null) {
+			console.log("ngOnChanges:", changes.station.currentValue);
+			let m = changes.station.currentValue.name.match(/(\d+\.\d+)/);
 
-      this.timer.restart();
-      let station = changes.station.currentValue;
+			if (m) {
+				this.sockService.send("CHANGE_STATION|" + m[0]);
+			}
 
-      if (this.audioEle && station.url != null) {
-        this.audioEle.src = station.url;
-        if (station.action == "Pause")
-          this.audioEle.play();
-        else
-          this.audioEle.pause();
-      }
-    } else {
-      this.audioEle.pause();
-    }
-  }
+			this.timer.restart();
+			let station = changes.station.currentValue;
+
+			if (this.audioEle && station.url != null) {
+				this.audioEle.src = station.url;
+				if (station.action == "Pause")
+					this.audioEle.play();
+				else
+					this.audioEle.pause();
+			}
+		} else {
+			this.audioEle.pause();
+		}
+	}
 }

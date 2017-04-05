@@ -1,81 +1,38 @@
-import {ApplicationRef, Injectable} from "@angular/core";
-import {Preference} from '../models/preference';
-
-const USER_SETTINGS = "userSettings";
+import {Injectable} from "@angular/core";
+import {Preference} from "../models/preference";
 
 /**
  * Singleton service for managing global states
  */
 @Injectable()
 export class AppService {
-  // single instance
-  preference: Preference = new Preference();
-  store: Storage = null;
-  status: string = "By coderek";
+	// single instance
+	preference: Preference = new Preference();
+	store: Storage = null;
+	status: string = "By coderek";
 
-  constructor(appRef: ApplicationRef) {
-    this.store = localStorage;
-    this.loadSettings();
-    setTimeout(()=>appRef.tick(), 0);
-  }
+	constructor() {
+		this.store = localStorage;
+	}
 
-  get autoPlay() {
-    return this.preference.autoPlay;
-  }
+	getPrefernce() {
+		return this.preference;
+	}
 
-  set autoPlay(aPlay: boolean) {
-    console.log("auto play: " + aPlay);
-    this.preference.autoPlay = aPlay;
-    this.savePreference();
-  }
+	put(key, val) {
+		this.store.setItem(key, JSON.stringify(val));
+	}
 
-  get playRandom() {
-    return this.preference.playRandom;
-  }
+	get(key) {
+		let val = this.store.getItem(key);
+		try {
+			return JSON.parse(val);
+		} catch (e) {
+			return val;
+		}
+	}
 
-  set playRandom(pRandom:boolean) {
-    console.log("play random: " + pRandom);
-    this.preference.playRandom = pRandom;
-    this.savePreference();
-  }
-
-  get songOnly() {
-    return this.preference.songOnly;
-  }
-
-  set songOnly(_songOnly:boolean) {
-    console.log("song only: " + _songOnly);
-    this.preference.songOnly = _songOnly;
-    this.savePreference();
-  }
-
-  savePreference() {
-    this.put(USER_SETTINGS, this.preference.toJSON());
-  }
-
-  put(key, val) {
-    this.store.setItem(key, JSON.stringify(val));
-  }
-
-  get(key) {
-    let val = this.store.getItem(key);
-    try {
-      return JSON.parse(val);
-    } catch (e) {
-      return val;
-    }
-  }
-
-  has(key) {
-    return this.store.getItem(key) !== null;
-  }
-
-  loadSettings() {
-    try {
-      const savedSettings = JSON.parse(this.store.getItem(USER_SETTINGS));
-      this.preference.load(savedSettings);
-    } catch (e) {
-      this.store.removeItem(USER_SETTINGS);
-    }
-  }
+	has(key) {
+		return this.store.getItem(key) !== null;
+	}
 }

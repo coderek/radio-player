@@ -7,12 +7,12 @@ import {SettingsComponent} from "./settings/settings.component";
 
 
 export const allComponents = [
-  AppComponent,
-  DisplayComponent,
-  ListComponent,
-  TimerComponent,
-  VisualSoundComponent,
-  SettingsComponent,
+	AppComponent,
+	DisplayComponent,
+	ListComponent,
+	TimerComponent,
+	VisualSoundComponent,
+	SettingsComponent,
 ];
 
 export const bootstrapComponent = AppComponent;
