@@ -1,10 +1,13 @@
 <div class="container" [ngClass]="{'in-electron': isRunningInElectron}">
-  <nav>
-    <header>
-      SG online Radio Player
-    </header>
-  </nav>
-  <app-display [station]="current_station"></app-display>
-  <app-list (onPlayStation)="onPlayStation($event)"></app-list>
-  <div class="status">{{status}}</div>
+    <nav>
+        <header>
+            SG online Radio Player
+        </header>
+    </nav>
+    <app-display [station]="current_station" [preference]="preference"></app-display>
+    <div class="toolbar">
+        <app-settings [preference]="preference" (onToggle)="onChangePreference($event)"></app-settings>
+    </div>
+    <app-list (onPlayStation)="onPlayStation($event)"></app-list>
+    <div class="status">{{status}}</div>
 </div>

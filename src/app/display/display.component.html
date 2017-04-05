@@ -1,29 +1,26 @@
 <div class="indent">
-  <div class="station-info">
-    <div *ngIf="station">
-      <div class="title">
-        {{station.name}}
-      </div>
+    <div class="station-info">
+        <div *ngIf="station">
+            <div class="title">
+                {{station.name}}
+            </div>
 
-      <div class="song-info">
-        <div class="left">
-          <div class="current_playing">
-            {{currentTrack}}
-          </div>
-          <div class="current_author">
-            {{currentArtist}}
-          </div>
+            <div class="song-info">
+                <div class="left">
+                    <div class="current_playing">
+                        {{currentTrack}}
+                    </div>
+                    <div class="current_author">
+                        {{currentArtist}}
+                    </div>
+                </div>
+                <div class="right">
+                    <img src="{{currentCoverUrl}}">
+                </div>
+            </div>
         </div>
-        <div class="right">
-          <img src="{{currentCoverUrl}}">
-        </div>
-      </div>
     </div>
-  </div>
-  <app-visual-sound [stream]="audioEle"></app-visual-sound>
+    <app-visual-sound [stream]="audioEle"></app-visual-sound>
 </div>
 
 <app-timer id="timer"></app-timer>
-<div class="toolbar">
-  <app-settings [preference]="preference"></app-settings>
-</div>

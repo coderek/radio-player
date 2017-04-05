@@ -13,8 +13,6 @@ import {Preference} from "../models/preference";
 
 export class ListComponent implements OnInit, AfterViewInit {
 	stations: Station[] = [];
-
-	@Input()
 	preference: Preference;
 
 	@Output()
@@ -24,6 +22,7 @@ export class ListComponent implements OnInit, AfterViewInit {
 	constructor(private appService: AppService) {
 		this.stations = environment.stations;
 		this.stations.forEach((s) => s.action = "Play");
+		this.preference = this.appService.getPrefernce();
 	}
 
 	ngOnInit() {

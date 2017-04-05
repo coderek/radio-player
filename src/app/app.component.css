@@ -2,39 +2,39 @@
 }
 
 .container {
-  display: flex;
-  flex-direction: column;
-  font-family: 'Space Mono', monospace;
-  /*display: block;*/
-  background-color: #474444;
-  color: white;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  width: 400px;
-  height: 100%;
-  max-height: 800px;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Space Mono', monospace;
+    /*display: block;*/
+    background-color: #474444;
+    color: white;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 400px;
+    height: 100%;
+    max-height: 800px;
 }
 
 .container.in-electron {
-  width: 100%;
+    width: 100%;
 }
 
 nav {
-  /*border-bottom: 1px solid black;*/
-  padding: 4px 10px;
+    /*border-bottom: 1px solid black;*/
+    padding: 4px 10px;
 }
 
 nav header {
-  font-weight: bold;
+    font-weight: bold;
 }
 
 .status {
-  text-align: right;
-  padding-right: 10px;
-  line-height: 40px;
-  height: 40px;
-  font-size: 80%;
-  color: #888;
+    text-align: right;
+    padding-right: 10px;
+    line-height: 40px;
+    height: 40px;
+    font-size: 80%;
+    color: #888;
 }
 

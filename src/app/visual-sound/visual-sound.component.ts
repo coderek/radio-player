@@ -70,7 +70,6 @@ export class VisualSoundComponent implements AfterViewInit {
 		requestAnimationFrame(() => this.draw());
 	}
 
-
 	static pastelColors() {
 		let r = (Math.round(Math.random() * 127) + 127).toString(16);
 		let b = (Math.round(Math.random() * 127) + 127).toString(16);
@@ -88,7 +87,6 @@ export class VisualSoundComponent implements AfterViewInit {
 			this.canvasCtx.fillRect(x, this.height - (squareSize + 1) * i, squareSize, squareSize);
 		}
 	}
-
 
 	ngAfterViewInit() {
 		this.initContext();

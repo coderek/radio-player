@@ -1,7 +1,6 @@
 import {Record} from "immutable";
 const USER_SETTINGS = "userSettings";
 
-
 export class Preference extends Record({
 	autoPlay: false,
 	playRandom: false,

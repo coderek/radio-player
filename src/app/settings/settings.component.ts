@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, Input, OnChanges} from "@angular/core";
+import {Output, ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges} from "@angular/core";
 import {Preference} from "../models/preference";
 
 @Component({
@@ -7,21 +7,21 @@ import {Preference} from "../models/preference";
         <md-slide-toggle title="Start playing when the player launch."
                          [ngClass]="{checked: autoPlay.checked}"
                          [checked]="preference.get('autoPlay')"
-                         (change)="preference.set('autoPlay', !preference.get('autoPlay'))"
+                         (change)="onToggle.emit('autoStart')"
                          #autoPlay>
             Auto Play
         </md-slide-toggle>
         <md-slide-toggle title="Play random station from favorite list after every song." [color]="'warn'"
                          [ngClass]="{checked: playRandom.checked}"
                          [checked]="preference.get('playRandom')"
-                         (change)="preference.set('playRandom', !preference.get('playRandom'))"
+                         (change)="onToggle.emit('playRandom')"
                          #playRandom>Random
         </md-slide-toggle>
         <md-slide-toggle [color]="'primary'"
                          [ngClass]="{checked: songOnly.checked}"
                          title="Skip talkings."
                          [checked]="preference.get('songOnly')"
-                         (change)="preference.get('songOnly', !preference.get('songOnly'))"
+                         (change)="onToggle.emit('songOnly')"
                          #songOnly>Song Only
         </md-slide-toggle>
 	`,
@@ -32,7 +32,11 @@ export class SettingsComponent implements OnChanges {
 	@Input()
 	preference: Preference;
 
+	@Output()
+	onToggle: EventEmitter<string>;
+
 	ngOnChanges() {
-		this.preference.save();
+		console.log(arguments)
+		// this.preference.save();
 	}
 }

@@ -5,7 +5,6 @@ import {TimerComponent} from "./timer/timer.component";
 import {VisualSoundComponent} from "./visual-sound/visual-sound.component";
 import {SettingsComponent} from "./settings/settings.component";
 
-
 export const allComponents = [
 	AppComponent,
 	DisplayComponent,

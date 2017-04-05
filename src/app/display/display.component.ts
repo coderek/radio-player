@@ -1,25 +1,27 @@
-import {Component, Input, OnChanges, ViewChild} from "@angular/core";
+import {ChangeDetectionStrategy, Component, Input, OnChanges, ViewChild} from "@angular/core";
 import {TimerComponent} from "../timer/timer.component";
 import {WebSocketService} from "../services/websocket.service";
 import "rxjs/add/operator/toPromise";
 import {Station} from "../models/station";
 import {trim} from "../services/util.service";
 import {Observable} from "rxjs/Rx";
-
+import {Preference} from "../models/preference";
 
 @Component({
 	selector: 'app-display',
 	providers: [WebSocketService],
 	templateUrl: './display.component.html',
-	styleUrls: ['./display.component.css']
+	styleUrls: ['./display.component.css'],
+	changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 export class DisplayComponent implements OnChanges {
 	// currently playing station
 	@Input()
 	station: Station = null;
-	// @Input()
 
+	@Input()
+	preference: Preference;
 
 	currentTrack: string = "";
 	currentArtist: string = "";
