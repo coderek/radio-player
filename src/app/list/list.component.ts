@@ -37,7 +37,6 @@ export class ListComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    console.log(this.appService.autoPlay)
     if (this.appService.autoPlay) {
       this.resumePlaying();
     }

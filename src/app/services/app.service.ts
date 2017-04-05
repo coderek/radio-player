@@ -1,27 +1,56 @@
-import {Injectable} from "@angular/core";
-import {Settings} from '../models/settings';
+import {ApplicationRef, Injectable} from "@angular/core";
+import {Preference} from '../models/preference';
 
 const USER_SETTINGS = "userSettings";
 
 /**
  * Singleton service for managing global states
- *
- *
  */
 @Injectable()
 export class AppService {
   // single instance
-  settings: Settings = new Settings();
+  preference: Preference = new Preference();
   store: Storage = null;
   status: string = "By coderek";
 
-  constructor() {
+  constructor(appRef: ApplicationRef) {
     this.store = localStorage;
     this.loadSettings();
+    setTimeout(()=>appRef.tick(), 0);
   }
 
   get autoPlay() {
-    return this.settings.autoPlay || false;
+    return this.preference.autoPlay;
+  }
+
+  set autoPlay(aPlay: boolean) {
+    console.log("auto play: " + aPlay);
+    this.preference.autoPlay = aPlay;
+    this.savePreference();
+  }
+
+  get playRandom() {
+    return this.preference.playRandom;
+  }
+
+  set playRandom(pRandom:boolean) {
+    console.log("play random: " + pRandom);
+    this.preference.playRandom = pRandom;
+    this.savePreference();
+  }
+
+  get songOnly() {
+    return this.preference.songOnly;
+  }
+
+  set songOnly(_songOnly:boolean) {
+    console.log("song only: " + _songOnly);
+    this.preference.songOnly = _songOnly;
+    this.savePreference();
+  }
+
+  savePreference() {
+    this.put(USER_SETTINGS, this.preference.toJSON());
   }
 
   put(key, val) {
@@ -37,25 +66,16 @@ export class AppService {
     }
   }
 
-  getSettings() : Settings {
-    return this.settings;
-  }
-
   has(key) {
-    return this.store.getItem(key) != null;
+    return this.store.getItem(key) !== null;
   }
 
   loadSettings() {
     try {
       const savedSettings = JSON.parse(this.store.getItem(USER_SETTINGS));
-      this.settings.load(savedSettings);
+      this.preference.load(savedSettings);
     } catch (e) {
       this.store.removeItem(USER_SETTINGS);
     }
-  }
-
-  saveSettings(settings: Settings) {
-    if (settings!==null)
-      this.store.setItem(USER_SETTINGS, JSON.stringify((settings)));
   }
 }

@@ -33,7 +33,7 @@ export class DisplayComponent implements OnChanges {
   constructor(private sockService: WebSocketService) {
     this.stream = sockService.getObservable();
     this.stream.subscribe(
-      (msg)=> console.log(msg),
+      (msg)=> '',
       (err)=> console.log(err),
       ()=> console.log('stream closed')
     );
