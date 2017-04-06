@@ -1,35 +1,23 @@
 import {AfterViewInit, ChangeDetectionStrategy, OnChanges, Component, ElementRef, Input, NgZone, ViewChild} from "@angular/core";
+import {AudioService} from "../services/audio.service";
 
 @Component({
 	selector: 'app-visual-sound',
 	styleUrls: ['./visual-sound.component.css'],
 	template: `
         <canvas #canvas height=40></canvas>`,
-	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class VisualSoundComponent implements AfterViewInit, OnChanges {
+export class VisualSoundComponent implements AfterViewInit {
 	@ViewChild("canvas")
 	canvas: ElementRef;
-
-	@Input("stream")
-	audioEle = null;
-
-	@Input()
-	mute: boolean;
 
 	canvasCtx = null;
 	width: number;
 	height: number = 40;
-	audioCtx: AudioContext;
-	gainNode: GainNode;
-	radioSource: AudioNode;
-	dataArray: Float32Array;
-	analyser: AnalyserNode;
 	swatches = [];
 	prop: number;
 
-	constructor(private ngZone: NgZone) {
-	}
+	constructor(private ngZone: NgZone, private audioService: AudioService) {}
 
 	initContext() {
 		this.swatches = Array(10).fill(1).map(() => VisualSoundComponent.pastelColors());
@@ -37,36 +25,23 @@ export class VisualSoundComponent implements AfterViewInit, OnChanges {
 		this.canvasCtx = canvas.getContext("2d");
 		this.width = canvas.width;
 		this.height = canvas.height;
-		this.audioCtx = new AudioContext();
 
-		this.radioSource = this.audioCtx.createMediaElementSource(this.audioEle);
-		this.gainNode = this.audioCtx.createGain();
-		this.analyser = this.audioCtx.createAnalyser();
-
-		this.gainNode.gain.value = 1;
-		this.radioSource.connect(this.analyser);
-		this.analyser.connect(this.gainNode);
-		this.gainNode.connect(this.audioCtx.destination);
-
-		this.analyser.fftSize = 64;
-		let bufferLength = this.analyser.frequencyBinCount;
-		this.dataArray = new Float32Array(bufferLength);
-		this.prop = this.height / (this.analyser.maxDecibels - this.analyser.minDecibels);
+		let audioRange = this.audioService.getDecibelsRange();
+		this.prop = this.height / audioRange;
 	}
 
 	draw() {
 		this.canvasCtx.clearRect(0, 0, this.width, this.height);
-
-		this.analyser.getFloatFrequencyData(this.dataArray);
 		this.canvasCtx.fillStyle = '#474444';
-
 		this.canvasCtx.fillRect(0, 0, this.width, this.height);
-		let barWidth = (this.width / this.dataArray.length);
+		let dataArray = this.audioService.getFrequencies();
 
+		let barWidth = (this.width / dataArray.length);
 		let barHeight;
+
 		let x = 0;
-		for (let i = 0; i < this.dataArray.length; i++) {
-			barHeight = this.prop * (this.dataArray[i] - this.analyser.minDecibels);
+		for (let i = 0; i < dataArray.length; i++) {
+			barHeight = this.prop * (dataArray[i] - this.audioService.getMinDecibels());
 			this.drawBar(x, barWidth, barHeight);
 			x += barWidth + 1;
 		}
@@ -94,12 +69,5 @@ export class VisualSoundComponent implements AfterViewInit, OnChanges {
 	ngAfterViewInit() {
 		this.initContext();
 		this.ngZone.runOutsideAngular(() => this.draw());
-	}
-
-	ngOnChanges(changes) {
-		if (changes.mute) {
-			let muteSound = changes.mute.currentValue;
-			console.log("mute sound: " + muteSound);
-		}
 	}
 }

@@ -5,6 +5,7 @@ import "rxjs/add/operator/toPromise";
 // import {Station} from "../models/station";
 import {trim} from "../services/util.service";
 import {Observable} from "rxjs/Rx";
+import {AudioService} from "../services/audio.service";
 
 @Component({
 	selector: 'app-display',
@@ -20,7 +21,7 @@ export class DisplayComponent implements OnChanges {
 	iPreference;
 
 	get paused() {
-		return this.audioEle.paused;
+		return this.audioService.isPaused();
 	}
 	currentTrack: string = "";
 	currentArtist: string = "";
@@ -32,9 +33,7 @@ export class DisplayComponent implements OnChanges {
 	@ViewChild(TimerComponent)
 	private timer: TimerComponent;
 
-	audioEle = new Audio;
-
-	constructor(private sockService: WebSocketService) {
+	constructor(private sockService: WebSocketService, private audioService: AudioService) {
 		this.stream = sockService.getObservable();
 		this.stream.subscribe(
 			(msg) => '',
@@ -42,7 +41,6 @@ export class DisplayComponent implements OnChanges {
 			() => console.log('stream closed')
 		);
 		this.sockService.setResultSelector(this.interpretServerMessage.bind(this));
-		this.audioEle.crossOrigin = "anonymous";
 	}
 
 	interpretServerMessage(e: MessageEvent) {
@@ -70,10 +68,12 @@ export class DisplayComponent implements OnChanges {
 				this.currentTrack = track;
 				this.currentCoverUrl = coverUrl;
 			} catch (e) {
+				console.log(e)
 				this.currentTrack = "";
 				this.currentArtist = "";
 				this.currentCoverUrl = "";
 			}
+			this.checkSongOnly()
 		}
 	}
 
@@ -93,34 +93,40 @@ export class DisplayComponent implements OnChanges {
 		return '';
 	}
 
+	checkSongOnly() {
+		let songOnly = this.iPreference.get('songOnly');
+		console.log("songOnly: " + songOnly, this.playingSong())
+		let shouldMute = songOnly && !this.playingSong();
+		this.audioService.toggleMute(shouldMute);
+	}
+
 	ngOnChanges(changes) {
 		if (changes.iPreference) {
-			let pref = changes.iPreference.currentValue;
-			if (pref) {
-				let songOnly = pref.get('songOnly');
-				this.muteAudio = songOnly && this.playingSong();
+			let {firstChange, previousValue, currentValue} = changes.iPreference;
+			if (firstChange || currentValue) {
+				this.checkSongOnly();
 			}
 		}
 
 		if (changes.iStation) {
-			console.log(changes.iStation);
-			let {previousValue, currentValue} = changes.iStation;
+			let {firstChange, previousValue, currentValue} = changes.iStation;
 
 			if (previousValue!== undefined && previousValue.get('name') === currentValue.get('name')) {
 				console.log('fuck', currentValue)
 				if (currentValue.get('action') === 'Play') {
-					this.audioEle.pause();
+					this.audioService.pause();
 				} else {
-					this.audioEle.play();
+					this.audioService.play();
 				}
-			} else if (currentValue!==undefined) {
+			} else if (firstChange || currentValue!==undefined) {
 				let m = currentValue.get('name').match(/(\d+\.\d+)/);
 				if (m) {
 					this.sockService.send("CHANGE_STATION|" + m[0]);
 					this.timer.restart();
-					this.audioEle.src = currentValue.get('url');
-					this.audioEle.play();
+					this.audioService.setAudioSource(currentValue.get('url'));
+					this.audioService.play();
 				}
+				this.checkSongOnly();
 			}
 		}
 	}

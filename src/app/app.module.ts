@@ -7,6 +7,7 @@ import {MaterialModule} from "@angular/material";
 import {allComponents, bootstrapComponent} from "./index";
 
 import {AppService} from "./services/app.service";
+import {AudioService} from "./services/audio.service";
 
 @NgModule({
 	declarations: allComponents,
@@ -18,6 +19,7 @@ import {AppService} from "./services/app.service";
 	],
 	providers: [
 		AppService,
+		AudioService
 	],
 	bootstrap: [bootstrapComponent]
 })
