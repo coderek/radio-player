@@ -1,8 +1,5 @@
 import {AfterViewInit, Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
-import {environment} from "environments/environment";
 import {AppService} from "../services/app.service";
-// import {Station} from "../models/station";
-import {List, Map} from "immutable";
 
 @Component({
 	selector: 'app-list',
@@ -14,6 +11,9 @@ export class ListComponent implements OnInit, AfterViewInit {
 
 	@Output()
 	onPlayStation = new EventEmitter<any>();
+
+	@Output()
+	favorites = new EventEmitter<any[]>();
 
 	selected = null;
 
@@ -49,7 +49,8 @@ export class ListComponent implements OnInit, AfterViewInit {
 	toggleFavorite(station) {
 		if (station) {
 			let idx = this.stations.findIndex(a=>a.get('name')===station.get('name'));
-			this.stations = this.stations.setIn([idx, 'favorite'], !station.get('favorite'));
+			this.stations = this.stations.set(idx, station.set('favorite', !station.get('favorite')));
+			this.favorites.emit(this.stations.filter(a=>a.get('favorite')));
 		}
 	}
 
@@ -63,10 +64,9 @@ export class ListComponent implements OnInit, AfterViewInit {
 	}
 
 	playStation(station) {
-		console.log(station);
 		this.pauseStation(this.selected);
 		let idx = this.stations.findIndex(a=>a.get('name')===station.get('name'))
-		this.stations = this.stations.setIn([idx, 'action'], 'Pause');
+		this.stations = this.stations.set(idx, station.set('action', 'Pause'));
 		let newStation = this.stations.get(idx);
 		this.selected = newStation;
 		this.appService.put("last_played", station.get('name'));

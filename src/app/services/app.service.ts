@@ -1,4 +1,5 @@
 import {Injectable} from "@angular/core";
+import {isImmutable} from 'immutable';
 
 /**
  * Singleton service for managing global states
@@ -14,7 +15,11 @@ export class AppService {
 	}
 
 	put(key, val) {
-		this.store.setItem(key, JSON.stringify(val));
+		if (isImmutable(val)) {
+			this.store.setItem(key, JSON.stringify(val.toJS()));
+		} else {
+			this.store.setItem(key, JSON.stringify(val));
+		}
 	}
 
 	get(key) {

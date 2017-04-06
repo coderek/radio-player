@@ -26,7 +26,11 @@ export class AudioService {
 	}
 
 	setAudioSource(src: string) {
-		this.audio.src = src;
+		try {
+			this.audio.src = src;
+		} catch (e) {
+
+		}
 	}
 
 	play() {this.audio.play();}

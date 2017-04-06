@@ -1,11 +1,17 @@
-import {ChangeDetectionStrategy, Component, Input, OnChanges, ViewChild} from "@angular/core";
+import {Component, EventEmitter, Input, OnChanges, Output, ViewChild} from "@angular/core";
 import {TimerComponent} from "../timer/timer.component";
 import {WebSocketService} from "../services/websocket.service";
 import "rxjs/add/operator/toPromise";
-// import {Station} from "../models/station";
 import {trim} from "../services/util.service";
-import {Observable} from "rxjs/Rx";
+import {Observable, Subject} from "rxjs/Rx";
 import {AudioService} from "../services/audio.service";
+import 'rxjs/operator/debounceTime';
+import 'rxjs/Subject';
+
+export enum ProgramType {
+	SONG=1, OTHER
+}
+
 
 @Component({
 	selector: 'app-display',
@@ -17,6 +23,11 @@ export class DisplayComponent implements OnChanges {
 	@Input()
 	iStation: any = null;
 
+	programs = new Subject();
+
+	@Output()
+	onNewProgram = this.programs.delay(1000).debounceTime(60000); // change frequency should not be less than 60s
+
 	@Input()
 	iPreference;
 
@@ -27,6 +38,18 @@ export class DisplayComponent implements OnChanges {
 	currentArtist: string = "";
 	currentCoverUrl: string = "";
 	muteAudio = false;
+
+	private _programType:ProgramType;
+	get currentProgramType() {
+		return this._programType;
+	}
+
+	set currentProgramType(_programType: ProgramType) {
+		if (_programType!== this.currentProgramType) {
+			this.programs.next(_programType);
+		}
+		this._programType = _programType;
+	}
 
 	stream: Observable<string>;
 
@@ -67,18 +90,20 @@ export class DisplayComponent implements OnChanges {
 				this.currentArtist = artist;
 				this.currentTrack = track;
 				this.currentCoverUrl = coverUrl;
+				this.currentProgramType = ProgramType.SONG;
 			} catch (e) {
-				console.log(e)
-				this.currentTrack = "";
+				console.log('Not json', data);
+				// this.currentTrack = "";
 				this.currentArtist = "";
 				this.currentCoverUrl = "";
+				this.currentProgramType = ProgramType.OTHER;
 			}
 			this.checkSongOnly()
 		}
 	}
 
 	playingSong(): boolean {
-		return this.currentTrack !== '' && this.currentArtist !== '';
+		return this.currentArtist !== '';
 	}
 
 	getDefaultCover(station) {
@@ -126,7 +151,6 @@ export class DisplayComponent implements OnChanges {
 					this.audioService.setAudioSource(currentValue.get('url'));
 					this.audioService.play();
 				}
-				this.checkSongOnly();
 			}
 		}
 	}

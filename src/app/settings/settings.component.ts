@@ -1,26 +1,29 @@
-import {Output, ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges} from "@angular/core";
+import {
+	Output, ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges,
+	ApplicationRef, SimpleChanges, ChangeDetectorRef
+} from "@angular/core";
 
 @Component({
 	selector: 'app-settings',
 	template: `
         <md-slide-toggle title="Start playing when the player launch."
-                         [ngClass]="{checked: iPreference.get('autoPlay')}"
-                         checked="iPreference.get('autoPlay')"
-                         (change)="emit('autoPlay')"
+                         [checked]="iPreference.get('autoPlay')"
+                         [ngClass]="{checked: autoPlay.checked}"
+                         (change)="emit('autoPlay', autoPlay.checked)"
                          #autoPlay>
             Auto Play
         </md-slide-toggle>
         <md-slide-toggle title="Play random station from favorite list after every song." [color]="'warn'"
-                         [ngClass]="{checked: iPreference.get('playRandom')}"
-                         checked="iPreference.get('playRandom')"
-                         (change)="emit('playRandom')"
+                         [ngClass]="{checked: playRandom.checked}"
+                         [checked]="iPreference.get('playRandom')"
+                         (change)="emit('playRandom', playRandom.checked)"
                          #playRandom>Random
         </md-slide-toggle>
         <md-slide-toggle [color]="'primary'"
-                         [ngClass]="{checked: iPreference.get('songOnly')}"
                          title="Skip talkings."
-                         checked="iPreference.get('songOnly')"
-                         (change)="emit('songOnly')"
+                         [checked]="iPreference.get('songOnly')"
+                         [ngClass]="{checked: songOnly.checked}"
+                         (change)="emit('songOnly', songOnly.checked)"
                          #songOnly>Song Only
         </md-slide-toggle>
 	`,
@@ -38,14 +41,19 @@ export class SettingsComponent implements OnChanges {
 	iPreference;
 
 	@Output()
-	onToggle = new EventEmitter<string>();
+	onToggle = new EventEmitter<any>();
 
-	ngOnChanges() {
-		// console.log(arguments)
-		// this.iPreference.save();
+	constructor(private ref: ChangeDetectorRef) {
+
 	}
-	emit(type) {
-		setTimeout(()=>
-		this.onToggle.emit(type),0)
+
+	ngOnChanges(changes: SimpleChanges) {
+		if (changes['iPreference'].firstChange) {
+			// [ngClass] attribute need to be updated after [check]
+			setTimeout(()=>this.ref.detectChanges(), 0);
+		}
+	}
+	emit(key, val) {
+		this.onToggle.emit({key, val});
 	}
 }
