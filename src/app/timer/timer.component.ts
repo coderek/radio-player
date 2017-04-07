@@ -1,4 +1,5 @@
-import {Component, Input, OnInit} from "@angular/core";
+import {Component} from "@angular/core";
+import {RadioAction, RadioService} from "../services/radio.service";
 
 const ONE_HOUR = 3600 * 1000;
 const ONE_MINUTE = 60 * 1000;
@@ -9,23 +10,40 @@ const ONE_SECOND = 1000;
 	template: `{{hour}}:{{minute}}:{{second}}`,
 	styles: [':host {margin: 10px; margin-bottom: 4px;}']
 })
-export class TimerComponent implements OnInit {
+export class TimerComponent  {
 	startTime: Date = null;
 	intervalHandler = null;
 	hour: String = "00";
 	minute: String = "00";
 	second: String = "00";
 	delta:number = 0;
-	@Input()
-	pause:boolean = false;
+	_pause = false;
 
-	constructor() {
+	constructor(private radioService: RadioService) {
+		radioService.actions
+			.subscribe(state=> {
+				switch (state) {
+					case RadioAction.play:
+						this._pause = false;
+						if (this.intervalHandler === null)
+							this.start();
+						break;
+					case RadioAction.pause:
+						this.pause();
+						break;
+					case RadioAction.new_station:
+						this.clear();
+						break;
+				}
+			});
 	}
 
-	ngOnInit() {
+	pause() {
+		this._pause = true;
 	}
 
 	restart() {
+		this._pause = false;
 		console.info("Timer restart");
 		this.clear();
 		this.start();
@@ -39,13 +57,13 @@ export class TimerComponent implements OnInit {
 	}
 
 	start() {
+		this._pause = false;
 		this.startTime = new Date;
 		this.intervalHandler = setInterval(this.update.bind(this), 1000);
 	}
 
 	update() {
-
-		if (this.pause) {
+		if (this._pause) {
 			this.startTime = new Date(Date.now() - this.delta);
 			return;
 		}

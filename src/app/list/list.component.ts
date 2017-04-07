@@ -14,20 +14,10 @@ export class ListComponent {
 	@Input()
 	stations: Map<string, Station>;
 
-	private currentPlaying: Station = null;
+	@Input()
+	currentPlaying: Station;
 
-	constructor(private appService: AppService, private radioService: RadioService) {}
-	//
-	// resumePlaying() {
-	// 	setTimeout(() => {
-	// 		if (this.appService.has("last_played")) {
-	// 			let name = this.appService.get("last_played");
-	// 			let station = this.stations.find((s) => s.get('name') == name);
-	// 			if (station)
-	// 				this.playStation(station);
-	// 		}
-	// 	}, 0);
-	// }
+	constructor(private radioService: RadioService) {}
 
 	toggleFavorite(station) {
 		this.radioService.toggleFavorite(station);
@@ -39,6 +29,5 @@ export class ListComponent {
 
 	playStation(station) {
 		this.radioService.play(station);
-		this.currentPlaying = station;
 	}
 }

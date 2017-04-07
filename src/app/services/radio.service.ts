@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {fromJS, Map} from "immutable";
-import {Subject} from "rxjs/Rx";
+import {Observable, Subject} from "rxjs/Rx";
 import {WebSocketService} from "./websocket.service";
 import {ProgramMeta} from "../models/program_meta";
 import {environment} from "../../environments/environment";
@@ -12,7 +12,13 @@ import {AudioService} from "./audio.service";
 export enum RadioState {
 	playing=1, paused, started
 }
+
+export enum RadioAction {
+	new_station=1, new_program, pause, play
+}
+
 const USER_SETTINGS = "userSettings";
+const LAST_PLAYED = "lastPlayed";
 
 @Injectable()
 export class RadioService {
@@ -20,10 +26,36 @@ export class RadioService {
 	private currentPlayingStation: Station;
 	private currentState: RadioState = RadioState.started;
 
-	public nextProgram: Subject<ProgramMeta>;
+	private nextProgram: Observable<ProgramMeta>;
+	private randomRequest = new Subject<void>();
+	public actions = new Subject<RadioAction>();
 
 	constructor(private socket: WebSocketService, private audio:AudioService) {
 		this.loadStations();
+		let previousProgram: ProgramMeta = null;
+		this.nextProgram = this.socket.observable.filter(meta=>meta!==undefined).map(meta=> {
+			if (isEmpty(meta.coverUrl)) {
+				meta.coverUrl = this.getDefaultCover(this.station);
+			}
+			if (this.station) {
+				meta.stationName = this.station.get('name');
+			}
+			return meta;
+		}).do(program=> {
+			this.audio.toggleMute(isEmpty(program.author) && this.getPreferenceFromLocalStorage().songOnly);
+			if (previousProgram === null || previousProgram.title !== program.title) {
+				if (this.getPreferenceFromLocalStorage().playRandom) {
+					this.randomRequest.next();
+				}
+			}
+		});
+
+		this.randomRequest.delay(1000).debounceTime(60000)
+			.subscribe(this.switchRandomStation.bind(this));
+	}
+
+	get status() {
+		return "By coderek";
 	}
 
 	set station(s: Station) {
@@ -32,22 +64,21 @@ export class RadioService {
 
 	get station() {return this.currentPlayingStation;}
 
-	set state(s: RadioState) {
-		this.currentState = s;
+	private getFavoriteStations() {
+		return this.stationMap.valueSeq().toArray().filter(station=>station.get('favorite'));
 	}
 
-	get state() {return this.currentState;}
+	private switchRandomStation() {
+		let favorites = this.getFavoriteStations();
+		if (favorites.length===0) {
+			favorites = this.stationMap.valueSeq().toArray();
+		}
+		let rand = ~~(Math.random() * favorites.length);
+		this.play(favorites[rand]);
+	}
 
 	public getProgramMetaSource() {
-		return this.socket.observable.map(meta=> {
-			if (isEmpty(meta.coverUrl)) {
-				meta.coverUrl = this.getDefaultCover(this.station);
-			}
-			if (this.station) {
-				meta.stationName = this.station.get('name');
-			}
-			return meta;
-		});
+		return this.nextProgram;
 	}
 
 	public updatePreference(key: string, val: any) {
@@ -68,18 +99,24 @@ export class RadioService {
 		}
 	}
 
-	public getPreference() {
-		return new Preference(this.getPreferenceFromLocalStorage());
+	public startLastStopped() {
+		if (localStorage.getItem(LAST_PLAYED)) {
+			let lastPlayedStation = localStorage.getItem(LAST_PLAYED);
+			let station = this.stationMap.get(lastPlayedStation);
+			if (station)
+				this.play(station);
+		}
 	}
 
-	public pickRandom() {
-
+	public getPreference() {
+		return new Preference(this.getPreferenceFromLocalStorage());
 	}
 
 	public pause() {
 		if (this.station) {
 			this.audio.pause();
 			this.stationMap = this.stationMap.setIn([this.station.get('name'), 'action'] , 'Play');
+			this.actions.next(RadioAction.pause);
 		}
 	}
 
@@ -103,9 +140,13 @@ export class RadioService {
 				this.stationMap = this.stationMap.setIn([curStationName, 'action'], 'Play');
 			}
 			this.station = this.stationMap.get(name);
+			// 4. save this as last played station
+			localStorage.setItem(LAST_PLAYED, this.station.get('name'));
+			this.actions.next(RadioAction.new_station);
 		}
 		this.stationMap = this.stationMap.setIn([this.station.get('name'), 'action'], 'Pause');
 		this.audio.play();
+		this.actions.next(RadioAction.play);
 	}
 
 	public toggleFavorite(station: Station) {
@@ -138,9 +179,5 @@ export class RadioService {
 			s['action'] = 'Play';
 			this.stationMap = this.stationMap.set(s.name,  fromJS(s));
 		});
-	}
-
-	private notifyProgramChanged(program: ProgramMeta) {
-		this.nextProgram.next(program);
 	}
 }

@@ -10,6 +10,8 @@
     flex: none;
     height: 250px;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .indent {

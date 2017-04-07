@@ -1,10 +1,6 @@
-import {Component, Input, ViewChild} from "@angular/core";
+import {Component, Input, OnInit} from "@angular/core";
 import {PlatformService} from "./services/platform.service";
-import {AppService} from "./services/app.service";
-import {Map} from 'immutable';
 import {RadioService} from "./services/radio.service";
-import {TimerComponent} from "./timer/timer.component";
-const USER_SETTINGS = "userSettings";
 
 @Component({
 	selector: 'app-root',
@@ -12,16 +8,13 @@ const USER_SETTINGS = "userSettings";
 	templateUrl: './app.component.html',
 	styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
 
 	isRunningInElectron: boolean = false;
 
 	get status() {
-		return this.appService.status;
+		return this.radioService.status;
 	}
-
-	@ViewChild(TimerComponent)
-	timer: TimerComponent;
 
 	@Input()
 	get programMeta () {
@@ -35,36 +28,18 @@ export class AppComponent {
 	get preference() {
 		return this.radioService.getPreference();
 	}
-	randomScheduler = null;
+	@Input()
+	get currentPlaying() {
+		return this.radioService.station;
+	}
 
-	constructor(
-			private platform: PlatformService,
-			private appService: AppService,
-			private radioService: RadioService) {
-
+	constructor(private platform: PlatformService, private radioService: RadioService) {
 		this.isRunningInElectron = platform.isRunningInElectron();
-		let favorites = appService.get('favorites') || [];
 	}
-/*
-	onNewProgram(type: ProgramType) {
-		let playRandom = this.preference.get('playRandom');
-		if (playRandom) {
-			let favorites = this.appService.get('favorites');
-			if (favorites.length===0) return;
-			let randomChosen = favorites[~~(Math.random() * favorites.length)];
-			console.log('Playing random station: ' + randomChosen.name);
 
-			let station = Map(randomChosen);
-			this.onPlayStation(station);
-			this.list.playStation(station);
+	ngOnInit() {
+		if (this.preference.autoPlay) {
+			this.radioService.startLastStopped();
 		}
-	}*/
-
-	onPlayStation(station) {
-		// this.iCurrentStation = station;
-	}
-
-	onChangeFavorites(stationNames: any[]) {
-		this.appService.put("favorites", stationNames);
 	}
 }
