@@ -1,24 +1,7 @@
-// import {Record} from 'immutable';
+export type Station = Map<string, string>;
 
-// let StationRecord = Record({
-// 	name: '',
-// 	url: '',
-// 	action: '',
-// 	favorite: false
-// });
-//
-//
-//
-//
-// export class Station extends StationRecord {
-//
-//   constructor(param:{
-// 	              name: string,
-// 	              url: string,
-// 	              action: string,
-// 	              favorite: boolean
-//
-//               }) {
-// 	super();
-//   }
+
+// export interface StationInter {
+// 	name?: string,
+// 	url?: string
 // }

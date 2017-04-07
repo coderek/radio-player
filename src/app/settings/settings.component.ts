@@ -1,29 +1,28 @@
-import {
-	Output, ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges,
-	ApplicationRef, SimpleChanges, ChangeDetectorRef
-} from "@angular/core";
+import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
+import {RadioService} from "../services/radio.service";
+import {Record} from "immutable";
 
 @Component({
 	selector: 'app-settings',
 	template: `
         <md-slide-toggle title="Start playing when the player launch."
-                         [checked]="iPreference.get('autoPlay')"
+                         [checked]="preference.get('autoPlay')"
                          [ngClass]="{checked: autoPlay.checked}"
-                         (change)="emit('autoPlay', autoPlay.checked)"
+                         (change)="update('autoPlay', autoPlay.checked)"
                          #autoPlay>
             Auto Play
         </md-slide-toggle>
         <md-slide-toggle title="Play random station from favorite list after every song." [color]="'warn'"
                          [ngClass]="{checked: playRandom.checked}"
-                         [checked]="iPreference.get('playRandom')"
-                         (change)="emit('playRandom', playRandom.checked)"
+                         [checked]="preference.get('playRandom')"
+                         (change)="update('playRandom', playRandom.checked)"
                          #playRandom>Random
         </md-slide-toggle>
         <md-slide-toggle [color]="'primary'"
                          title="Skip talkings."
-                         [checked]="iPreference.get('songOnly')"
+                         [checked]="preference.get('songOnly')"
                          [ngClass]="{checked: songOnly.checked}"
-                         (change)="emit('songOnly', songOnly.checked)"
+                         (change)="update('songOnly', songOnly.checked)"
                          #songOnly>Song Only
         </md-slide-toggle>
 	`,
@@ -36,24 +35,14 @@ import {
 	`],
 	changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SettingsComponent implements OnChanges {
+export class SettingsComponent {
 	@Input()
-	iPreference;
+	preference:Record<string, any>;
 
-	@Output()
-	onToggle = new EventEmitter<any>();
-
-	constructor(private ref: ChangeDetectorRef) {
-
+	constructor(private radioService: RadioService) {
 	}
 
-	ngOnChanges(changes: SimpleChanges) {
-		if (changes['iPreference'].firstChange) {
-			// [ngClass] attribute need to be updated after [check]
-			setTimeout(()=>this.ref.detectChanges(), 0);
-		}
-	}
-	emit(key, val) {
-		this.onToggle.emit({key, val});
+	update(key, val) {
+		this.radioService.updatePreference(key, val);
 	}
 }

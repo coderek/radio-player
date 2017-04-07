@@ -1,12 +1,9 @@
-import {Component, ViewChild} from "@angular/core";
-// import {Station} from "./models/station";
-
+import {Component, Input, ViewChild} from "@angular/core";
 import {PlatformService} from "./services/platform.service";
 import {AppService} from "./services/app.service";
-import {Map, List, fromJS, Collection} from 'immutable';
-import {environment} from "../environments/environment";
-import {ProgramType} from "./display/display.component";
-import {ListComponent} from "./list/list.component";
+import {Map} from 'immutable';
+import {RadioService} from "./services/radio.service";
+import {TimerComponent} from "./timer/timer.component";
 const USER_SETTINGS = "userSettings";
 
 @Component({
@@ -16,56 +13,41 @@ const USER_SETTINGS = "userSettings";
 	styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-	iCurrentStation:any = Map({
-		name: '',
-		url: '',
-		action: '',
-		favorite: false
-	});
 
 	isRunningInElectron: boolean = false;
-
-	iPreference: any = Map({
-		songOnly: false,
-		playRandom: false,
-		autoPlay: false
-	});
 
 	get status() {
 		return this.appService.status;
 	}
 
-	@ViewChild(ListComponent)
-	list: ListComponent;
+	@ViewChild(TimerComponent)
+	timer: TimerComponent;
 
-	// immutable
-	stations: any;
+	@Input()
+	get programMeta () {
+		return this.radioService.getProgramMetaSource();
+	}
+	@Input()
+	get stations() {
+		return this.radioService.getStations();
+	}
+	@Input()
+	get preference() {
+		return this.radioService.getPreference();
+	}
 	randomScheduler = null;
 
-	constructor(private platform: PlatformService, private appService: AppService) {
+	constructor(
+			private platform: PlatformService,
+			private appService: AppService,
+			private radioService: RadioService) {
+
 		this.isRunningInElectron = platform.isRunningInElectron();
-		// if (typeof localStorage !== 'object') throw new Error("No localstorage! Radio can't start");
-		try {
-			this.iPreference = Map(JSON.parse(localStorage.getItem(USER_SETTINGS)));
-			console.log('loaded iPreference: ', this.iPreference.toJS())
-		} catch (e) {
-			// ignore invalid iPreference settings
-		}
-		let favorites = this.appService.get('favorites') || [];
-		this.stations = fromJS(environment.stations.map((s: any)=> {
-			s.action = "Play";
-			s.favorite = !!favorites.find(f=>f.name===s.name);
-			return s;
-		}));
+		let favorites = appService.get('favorites') || [];
 	}
-
-	onChangePreference(ev) {
-		this.iPreference = this.iPreference.set(ev.key, ev.val);
-		localStorage.setItem(USER_SETTINGS, JSON.stringify(this.iPreference.toJS()));
-	}
-
+/*
 	onNewProgram(type: ProgramType) {
-		let playRandom = this.iPreference.get('playRandom');
+		let playRandom = this.preference.get('playRandom');
 		if (playRandom) {
 			let favorites = this.appService.get('favorites');
 			if (favorites.length===0) return;
@@ -76,10 +58,10 @@ export class AppComponent {
 			this.onPlayStation(station);
 			this.list.playStation(station);
 		}
-	}
+	}*/
 
 	onPlayStation(station) {
-		this.iCurrentStation = station;
+		// this.iCurrentStation = station;
 	}
 
 	onChangeFavorites(stationNames: any[]) {

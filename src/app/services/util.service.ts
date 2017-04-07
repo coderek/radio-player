@@ -21,3 +21,11 @@ export function trim(s, target) {
 	}
 	return "";
 }
+
+export function deepCopy(a) {
+	return JSON.parse(JSON.stringify(a));
+}
+
+export function isEmpty(s) {
+	return s == null || s == '';
+}

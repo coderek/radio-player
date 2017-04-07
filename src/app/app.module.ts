@@ -8,6 +8,8 @@ import {allComponents, bootstrapComponent} from "./index";
 
 import {AppService} from "./services/app.service";
 import {AudioService} from "./services/audio.service";
+import {RadioService} from "./services/radio.service";
+import {WebSocketService} from "./services/websocket.service";
 
 @NgModule({
 	declarations: allComponents,
@@ -19,7 +21,9 @@ import {AudioService} from "./services/audio.service";
 	],
 	providers: [
 		AppService,
-		AudioService
+		AudioService,
+		RadioService,
+		WebSocketService,
 	],
 	bootstrap: [bootstrapComponent]
 })

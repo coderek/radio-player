@@ -1,18 +1,18 @@
-<div class="row"
-     *ngFor="let station of stations"  [class.selected]="selected===station">
+<div class="row" *ngFor="let station of stations.values()"
+        [class.selected]="currentPlaying && station.get('name') === currentPlaying.get('name')">
     <div>{{station.get('name')}}
         <md-icon style="font-size: 12px" (click)="toggleFavorite(station)">
             {{station.get('favorite')? 'favorite':'favorite_bordered'}}
         </md-icon>
     </div>
-    <!--<buttoiStationtion.action}}</button>-->
-    <span class="play-button" [hidden]="station.get('action') !== 'Play'" (click)="playStation(station)">
-    <md-icon>play_circle_filled</md-icon>
-    <md-icon>play_circle_outlined</md-icon>
-  </span>
 
-    <span class="pause-button" [hidden]="station.get('action') !== 'Pause'" (click)="pauseStation(station)">
-    <md-icon>pause_circle_filled</md-icon>
-    <md-icon>pause_circle_outlined</md-icon>
-  </span>
+    <span class="play-button" [hidden]="station.get('action') !== 'Play'" (click)="playStation(station)">
+        <md-icon>play_circle_filled</md-icon>
+        <md-icon>play_circle_outlined</md-icon>
+    </span>
+
+    <span class="pause-button" [hidden]="station.get('action') !== 'Pause'" (click)="pauseStation()">
+        <md-icon>pause_circle_filled</md-icon>
+        <md-icon>pause_circle_outlined</md-icon>
+    </span>
 </div>

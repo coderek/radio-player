@@ -5,7 +5,7 @@
 
 export const environment = {
     production: false,
-    ws: "ws://derekzeng.me:4201",
+    ws: "ws://pi:4201",
     stations: [
         {name: "Ria 89.7", url: "http://mediacorp.rastream.com/897fm"},
         {name: "Gold 90.5 FM", url: "http://mediacorp.rastream.com/905fm"},

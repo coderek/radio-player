@@ -6,7 +6,8 @@ const ONE_SECOND = 1000;
 
 @Component({
 	selector: 'app-timer',
-	template: `{{hour}}:{{minute}}:{{second}}`
+	template: `{{hour}}:{{minute}}:{{second}}`,
+	styles: [':host {margin: 10px; margin-bottom: 4px;}']
 })
 export class TimerComponent implements OnInit {
 	startTime: Date = null;
