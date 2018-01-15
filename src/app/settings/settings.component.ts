@@ -6,7 +6,6 @@ import {Record} from "immutable";
 	selector: 'app-settings',
 	template: `
         <md-slide-toggle title="Start playing when the player launch."
-                         [checked]="preference.get('autoPlay')"
                          [ngClass]="{checked: autoPlay.checked}"
                          (change)="update('autoPlay', autoPlay.checked)"
                          #autoPlay>
@@ -14,13 +13,11 @@ import {Record} from "immutable";
         </md-slide-toggle>
         <md-slide-toggle title="Play random station from favorite list after every song." [color]="'warn'"
                          [ngClass]="{checked: playRandom.checked}"
-                         [checked]="preference.get('playRandom')"
                          (change)="update('playRandom', playRandom.checked)"
                          #playRandom>Random
         </md-slide-toggle>
         <md-slide-toggle [color]="'primary'"
                          title="Skip talkings."
-                         [checked]="preference.get('songOnly')"
                          [ngClass]="{checked: songOnly.checked}"
                          (change)="update('songOnly', songOnly.checked)"
                          #songOnly>Song Only
@@ -36,8 +33,8 @@ import {Record} from "immutable";
 	changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SettingsComponent {
-	@Input()
-	preference:Record<string, any>;
+	// @Input()
+	// preference:Record<string, any>;
 
 	constructor(private radioService: RadioService) {
 	}
